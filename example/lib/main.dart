@@ -121,7 +121,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (BuildContext context, int index) {
                     final message = Message.messages[index];
 
-                    final config = ChatReactionsConfig(
+                    const config = ChatReactionsConfig(
                       enableHapticFeedback: true,
                       maxReactionsToShow: 3,
                       enableDoubleTap: true,

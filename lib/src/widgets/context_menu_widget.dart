@@ -12,7 +12,7 @@ import 'package:flutter_chat_reactions/src/widgets/rections_row.dart';
 /// - A row of reaction emojis that can be tapped
 /// - The original message (displayed using a Hero animation)
 /// - A context menu with customizable options
-class ReactionsDialogWidget extends StatelessWidget {
+class ReactionsDialogWidget extends StatefulWidget {
   /// Unique identifier for the hero animation.
   final String messageId;
 
@@ -47,53 +47,128 @@ class ReactionsDialogWidget extends StatelessWidget {
   });
 
   @override
+  State<ReactionsDialogWidget> createState() => _ReactionsDialogWidgetState();
+}
+
+class _ReactionsDialogWidgetState extends State<ReactionsDialogWidget> {
+
+  final _bubbleKey = GlobalKey();
+  double _bubbleHeight = 0;
+
+  bool get _isBubbleTallerThanScreen {
+    final screenHeight = MediaQuery.of(context).size.height;
+    return _bubbleHeight > screenHeight - 300;
+  }
+
+  
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
+  }
+
+  void _measure() {
+    final box = _bubbleKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    setState(() => _bubbleHeight = box.size.height);
+  }
+
+  void _handleReactionTap(BuildContext context, String reaction) {
+    Navigator.of(context).pop();
+    widget.onReactionTap(reaction);
+  }
+
+  void _handleMenuItemTap(BuildContext context, MenuItem item) {
+    Navigator.of(context).pop();
+    widget.onMenuItemTap(item);
+  }
+
+   @override
   Widget build(BuildContext context) {
+    final config = widget.config;
+    final alignment = widget.alignment;
+    final maxBubbleHeight = MediaQuery.of(context).size.height * 0.8;
     return BackdropFilter(
       filter: ImageFilter.blur(
-          sigmaX: config.dialogBlurSigma, sigmaY: config.dialogBlurSigma),
+        sigmaX: config.dialogBlurSigma,
+        sigmaY: config.dialogBlurSigma,
+      ),
       child: Center(
         child: Padding(
           padding: config.dialogPadding,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Stack(
             children: [
-              ReactionsRow(
-                reactions: config.availableReactions,
-                alignment: alignment,
-                onReactionTap: (reaction, _) =>
-                    _handleReactionTap(context, reaction),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if(_isBubbleTallerThanScreen)
+                    const SizedBox(height: 40),
+                  
+                  ReactionsRow(
+                    reactions: config.availableReactions,
+                    alignment: alignment,
+                    onReactionTap: (reaction, _) =>
+                        _handleReactionTap(context, reaction),
+                  ),
+
+                  const SizedBox(height: 10),
+                  
+                  ConstrainedBox(
+                  constraints: BoxConstraints(
+                    // Let it grow up to some portion of the screen height.
+                    maxHeight: maxBubbleHeight,
+                  ),
+                  child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: SingleChildScrollView(
+                        child: MessageBubble(
+                          key: _bubbleKey,
+                          id: widget.messageId,
+                          messageWidget: widget.messageWidget,
+                          alignment: alignment,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+
+
+                  if (config.showContextMenu && !_isBubbleTallerThanScreen) ...[
+                    const SizedBox(height: 10),
+                    ContextMenuWidget(
+                      menuItems: config.menuItems,
+                      alignment: alignment,
+                      onMenuItemTap: (item, _) => _handleMenuItemTap(context, item),
+                      customMenuItemBuilder: config.customMenuItemBuilder,
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: 10),
-              MessageBubble(
-                id: messageId,
-                messageWidget: messageWidget,
-                alignment: alignment,
-              ),
-              if (config.showContextMenu) ...[
-                const SizedBox(height: 10),
-                ContextMenuWidget(
-                  menuItems: config.menuItems,
-                  alignment: alignment,
-                  onMenuItemTap: (item, _) => _handleMenuItemTap(context, item),
-                  customMenuItemBuilder: config.customMenuItemBuilder,
+
+              if (config.showContextMenu && _isBubbleTallerThanScreen)
+                Positioned(
+                  bottom: 100,
+                  left: widget.alignment == Alignment.centerLeft ? 0 : null,
+                  right: widget.alignment == Alignment.centerRight ? 0 : null,
+                  child: ContextMenuWidget(
+                    menuItems: config.menuItems,
+                    alignment: alignment,
+                    onMenuItemTap: (item, _) => _handleMenuItemTap(context, item),
+                    customMenuItemBuilder: config.customMenuItemBuilder,
+                  ),
                 ),
-              ],
             ],
           ),
         ),
       ),
     );
   }
-
-  void _handleReactionTap(BuildContext context, String reaction) {
-    Navigator.of(context).pop();
-    onReactionTap(reaction);
-  }
-
-  void _handleMenuItemTap(BuildContext context, MenuItem item) {
-    Navigator.of(context).pop();
-    onMenuItemTap(item);
-  }
+  
 }
 
 class ContextMenuWidget extends StatelessWidget {
