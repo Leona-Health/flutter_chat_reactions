@@ -183,7 +183,7 @@ class ContextMenuWidget extends StatelessWidget {
     required this.menuItems,
     required this.onMenuItemTap,
     this.alignment = Alignment.centerRight,
-    this.menuWidth = 0.45,
+    this.menuWidth = 0.7,
     this.customMenuItemBuilder,
   });
 
@@ -191,65 +191,78 @@ class ContextMenuWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Align(
       alignment: alignment,
-      child: Container(
-        width: MediaQuery.of(context).size.width * menuWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF2E2E2E)
-              : const Color(0xFFFFFFFF),
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: menuItems.map(
-            (item) {
-              if (customMenuItemBuilder != null) {
-                return customMenuItemBuilder!(
-                  item,
-                  () => onMenuItemTap(item, menuItems.indexOf(item)),
-                );
-              }
-              return Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => onMenuItemTap(item, menuItems.indexOf(item)),
-                  borderRadius: BorderRadius.circular(15),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            color: item.isDestructive
-                                ? Colors.red
-                                : Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black,
-                            fontSize: 16,
+      child: IntrinsicWidth(child: 
+          Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF2E2E2E)
+                : const Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: menuItems.map(
+              (item) {
+                if (customMenuItemBuilder != null) {
+                  return customMenuItemBuilder!(
+                    item,
+                    () => onMenuItemTap(item, menuItems.indexOf(item)),
+                  );
+                }
+                return Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => onMenuItemTap(item, menuItems.indexOf(item)),
+                    borderRadius: BorderRadius.circular(15),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        
+                        children: [
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              color: item.isDestructive
+                                  ? Colors.red
+                                  : Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        Icon(
-                          item.icon,
-                          color: item.isDestructive
-                              ? Colors.red
-                              : Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black,
-                          size: 20,
-                        ),
-                      ],
+                          const SizedBox(width: 8,),
+                          if(item.assetName != null)
+                            Image.asset(item.assetName!, 
+                             height: 20,
+                             color: item.isDestructive
+                                  ? Colors.red
+                                  : Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                          ),
+                          if(item.icon != null) 
+                            Icon(
+                              item.icon,
+                              color: item.isDestructive
+                                  ? Colors.red
+                                  : Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                              size: 20,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
-          ).toList(),
+                );
+              },
+            ).toList(),
+          ),
         ),
-      ),
+      )
     );
   }
 }
