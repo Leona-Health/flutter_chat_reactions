@@ -117,7 +117,7 @@ class _ReactionsDialogWidgetState extends State<ReactionsDialogWidget> {
                   
                   ConstrainedBox(
                   constraints: BoxConstraints(
-                    // Let it grow up to some portion of the screen height.
+                    
                     maxHeight: maxBubbleHeight,
                   ),
                   child: GestureDetector(
@@ -189,80 +189,92 @@ class ContextMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Align(
       alignment: alignment,
-      child: IntrinsicWidth(child: 
-          Container(
+      child: IntrinsicWidth(
+        child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
+            color: theme.brightness == Brightness.dark
                 ? const Color(0xFF2E2E2E)
-                : const Color(0xFFFFFFFF),
+                : const Color(0xFFFAFAFF),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: menuItems.map(
-              (item) {
-                if (customMenuItemBuilder != null) {
-                  return customMenuItemBuilder!(
-                    item,
-                    () => onMenuItemTap(item, menuItems.indexOf(item)),
-                  );
-                }
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => onMenuItemTap(item, menuItems.indexOf(item)),
-                    borderRadius: BorderRadius.circular(15),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        
-                        children: [
-                          Text(
-                            item.label,
-                            style: TextStyle(
-                              color: item.isDestructive
-                                  ? Colors.red
-                                  : Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(width: 8,),
-                          if(item.assetName != null)
-                            Image.asset(item.assetName!, 
-                             height: 20,
-                             color: item.isDestructive
-                                  ? Colors.red
-                                  : Theme.of(context).brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                          ),
-                          if(item.icon != null) 
-                            Icon(
-                              item.icon,
-                              color: item.isDestructive
-                                  ? Colors.red
-                                  : Theme.of(context).brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
-                              size: 20,
-                            ),
-                        ],
-                      ),
-                    ),
+            children: [
+              for (var i = 0; i < menuItems.length; i++) ...[
+                _buildMenuItem(context, menuItems[i], i, theme),
+                if (i != menuItems.length - 1)
+                  Divider(
+                    height: 1,
+                    thickness: 0.2,
+                    color: theme.brightness == Brightness.dark 
+                      ? const Color(0xFFFAFAFF) 
+                      : const Color(0xFF2E2E2E),
                   ),
-                );
-              },
-            ).toList(),
+              ],
+            ],
           ),
         ),
-      )
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context,
+    MenuItem item,
+    int index,
+    ThemeData theme,
+  ) {
+    if (customMenuItemBuilder != null) {
+      return customMenuItemBuilder!(
+        item,
+        () => onMenuItemTap(item, index),
+      );
+    }
+
+    final color = item.isDestructive
+        ? Colors.red
+        : theme.brightness == Brightness.dark
+            ? Colors.white
+            : Colors.black;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => onMenuItemTap(item, index),
+        borderRadius: BorderRadius.circular(15),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                item.label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (item.assetName != null)
+                Image.asset(
+                  item.assetName!,
+                  height: 20,
+                  color: color,
+                ),
+              if (item.icon != null)
+                Icon(
+                  item.icon,
+                  color: color,
+                  size: 20,
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
