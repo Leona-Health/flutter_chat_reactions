@@ -28,7 +28,7 @@ class ChatReactionsConfig {
   const ChatReactionsConfig({
     this.availableReactions = const ['👍', '❤️', '😂', '😮', '😢', '😠', '➕'],
     this.menuItems = const [
-      MenuItem(label: 'Reply', icon: Icons.reply),
+      MenuItem(label: 'Reply', icon: Icons.reply,),
       MenuItem(label: 'Copy', icon: Icons.copy),
       MenuItem(
           label: 'Delete', icon: Icons.delete_forever, isDestructive: true),

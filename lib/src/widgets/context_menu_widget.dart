@@ -83,6 +83,9 @@ class _ReactionsDialogWidgetState extends State<ReactionsDialogWidget> {
   void _handleMenuItemTap(BuildContext context, MenuItem item) {
     Navigator.of(context).pop();
     widget.onMenuItemTap(item);
+    if (item.onPressed != null) {
+      item.onPressed!();
+    }
   }
 
    @override
