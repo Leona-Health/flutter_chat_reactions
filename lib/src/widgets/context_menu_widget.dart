@@ -119,23 +119,30 @@ class _ReactionsDialogWidgetState extends State<ReactionsDialogWidget> {
                   const SizedBox(height: 10),
                   
                   ConstrainedBox(
-                  constraints: BoxConstraints(
-                    
-                    maxHeight: maxBubbleHeight,
-                  ),
-                  child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: SingleChildScrollView(
-                        child: MessageBubble(
-                          key: _bubbleKey,
-                          id: widget.messageId,
-                          messageWidget: widget.messageWidget,
-                          alignment: alignment,
+                    constraints: BoxConstraints(maxHeight: maxBubbleHeight),
+                    child: Stack(
+                      children: [
+                        
+                        SingleChildScrollView(
+                          child: MessageBubble(
+                            key: _bubbleKey,
+                            id: widget.messageId,
+                            messageWidget: widget.messageWidget,
+                            alignment: alignment,
+                          ),
                         ),
-                      ),
+
+                        
+                        Positioned.fill(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () => Navigator.of(context).pop(),
+
+                            
+                            child: const SizedBox.expand(),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   
